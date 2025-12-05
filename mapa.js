@@ -69,7 +69,7 @@ function parseCSV(csvString) {
  */
 function styleZona(feature) {
     // Reemplaza 'ID_ZONA' si el nombre de la propiedad en tu GeoJSON es diferente
-    const idZona = feature.properties.ID_ZONA; 
+    const idZona = feature.properties.Name; 
     const datosZona = estadoZonas[idZona];
     
     let colorRelleno = 'gray'; // Color por defecto si no se encuentra el ID
@@ -95,7 +95,7 @@ function styleZona(feature) {
  * Maneja el evento de clic en una zona (mostrar pop-up con imagen).
  */
 function manejarClickZona(feature, layer) {
-    const idZona = feature.properties.ID_ZONA; 
+    const idZona = feature.properties.Name; 
     const datosZona = estadoZonas[idZona];
     
     let popupContent = `<h3>Zona: ${idZona}</h3><p>Información no disponible.</p>`;
@@ -218,4 +218,5 @@ function actualizarMapa() {
 actualizarMapa(); 
 
 // 2. Programar la actualización automática (refresco)
+
 setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
