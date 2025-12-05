@@ -4,7 +4,7 @@
 
 // 🚨 NUEVA URL DE LA HOJA DE CÁLCULO EN FORMATO JSON
 // EJEMPLO: 'https://spreadsheets.google.com/feeds/list/ID_DOCUMENTO/ID_HOJA/public/values?alt=json'
-const GOOGLE_SHEET_URL = 'https://spreadsheets.google.com/feeds/list/1vQ9XDZiBWcTtcYhYY_zav7eMzBT9H9NzP-9-pa4gmXdb-81r7JNC9aTVluoUKdxt1nDsjqaLwDGGvaN/1216622820/public/values?alt=json';
+const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbxym4UsG7Afk3sRLVmtHFAFoGbAMTomgpvbkxyUdaKA5oHgHsi2LmaVOoewOXw_6v0/exec';
 
 const GEOJSON_URL = 'zonas.geojson'; 
 
@@ -139,33 +139,43 @@ function cargarGeoJson(url) {
 /**
  * Obtiene los datos de la hoja de cálculo usando el formato JSON de Google Sheets.
  */
+/**
+ * Obtiene los datos de la hoja de cálculo usando la URL del Apps Script.
+ */
 async function actualizarMapa() {
-    console.log('Buscando actualizaciones en GSheet vía JSON...');
+    console.log('Buscando actualizaciones en Apps Script...');
     try {
         const response = await fetch(GOOGLE_SHEET_URL);
-        const data = await response.json(); // Leemos directamente el JSON
+        // Leemos la respuesta como JSON puro que el script nos devuelve
+        const registros = await response.json(); 
         
-        // Los registros de fila están en data.feed.entry
-        const registros = data.feed.entry; 
-
         estadoZonas = {};
 
         registros.forEach(registro => {
-            // 🚨 Acceso a las propiedades JSON de Google (gsx$nombre_columna_sin_espacios.$t)
+            // Buscamos las claves en MINÚSCULAS y con guion bajo, como las genera el script
             
-            // 1. Clave de la Zona: Buscamos 'gsx$id_geojson.$t'
-            const idBruto = registro.gsx$id_geojson.$t; 
+            const idBruto = registro.id_geojson; 
             const idGeoJson = idBruto ? idBruto.trim() : null;
 
             if (idGeoJson) {
                 estadoZonas[idGeoJson] = {
-                    // 2. Estado
-                    estado: registro.gsx$estado.$t, 
-                    // 3. ID de Drive
-                    pdfId: registro.gsx$pdfid.$t 
+                    estado: registro.estado, 
+                    pdfId: registro.pdfid 
                 };
             }
         });
+
+        // Repintar las zonas si ya están cargadas
+        if (geoJsonLayer) {
+            geoJsonLayer.eachLayer(layer => {
+                layer.setStyle(styleZona(layer.feature));
+            });
+        }
+        
+    } catch (error) {
+        console.error('Error al obtener datos del Apps Script. Falló el fetch:', error);
+    }
+}
 
         // Repintar las zonas si ya están cargadas
         if (geoJsonLayer) {
@@ -201,3 +211,4 @@ document.addEventListener('DOMContentLoaded', () => {
     
     setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
 });
+
