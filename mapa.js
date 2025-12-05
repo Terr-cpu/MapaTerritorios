@@ -24,12 +24,17 @@ let map = null;
 /**
  * Función simple para parsear CSV (Sin forzar mayúsculas).
  */
+/**
+ * Función robusta para parsear CSV: Limpia y normaliza encabezados a MINÚSCULAS.
+ */
 function parseCSV(csvString) {
     let lines = csvString.trim().split('\n').filter(line => line.trim().length > 0);
     if (lines.length === 0) return [];
     
-    // Encabezados se leen literal para que coincidan con lo que escribió el usuario
-    const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+    // Normaliza encabezados a MINÚSCULAS y reemplaza espacios por '_'
+    const headers = lines[0].split(',').map(h => 
+        h.trim().replace(/^"|"$/g, '').toLowerCase().replace(/\s+/g, '_')
+    );
 
     const data = [];
     for (let i = 1; i < lines.length; i++) {
@@ -152,30 +157,36 @@ function cargarGeoJson(url) {
         .catch(error => console.error('Error al cargar el GeoJSON:', error));
 }
 
-
+/**
+ * Obtiene los datos de la hoja de cálculo y actualiza el estado.
+ */
 async function actualizarMapa() {
     console.log('Buscando actualizaciones en GSheet...');
     try {
         const response = await fetch(GOOGLE_SHEET_URL);
         const csvText = await response.text();
-        const registros = parseCSV(csvText); 
+        const registros = parseCSV(csvText); // Usamos la función parseCSV normalizada
 
         estadoZonas = {};
 
         registros.forEach(registro => {
-            // Asumimos NOMBRES LITERALES para las claves de columna del Sheet
+            // ✅ SOLUCIÓN FINAL: Buscamos las claves en MINÚSCULAS
             
-            // 🚨 ADVERTENCIA: Si tu columna no se llama 'ID_GEOJSON', cámbiala aquí
-            const idGeoJson = registro.ID_GEOJSON.trim(); 
+            // 1. Clave de la Zona: Buscamos 'id_geojson' (normalizado)
+            const idBruto = registro.id_geojson; 
+            const idGeoJson = idBruto ? idBruto.trim() : null;
 
             if (idGeoJson) {
                 estadoZonas[idGeoJson] = {
-                    estado: registro.Estado, // Asumimos 'Estado' literal
-                    pdfId: registro.PDF_ID   // Asumimos 'PDF_ID' literal
+                    // 2. Estado: Buscamos 'estado' (normalizado)
+                    estado: registro.estado, 
+                    // 3. ID de Drive: Buscamos 'pdf_id' (normalizado)
+                    pdfId: registro.pdf_id 
                 };
             }
         });
 
+        // Repintar las zonas si ya están cargadas
         if (geoJsonLayer) {
             geoJsonLayer.eachLayer(layer => {
                 layer.setStyle(styleZona(layer.feature));
@@ -186,6 +197,7 @@ async function actualizarMapa() {
         console.error('Error al obtener datos de la hoja de cálculo:', error);
     }
 }
+
 
 // =================================================================
 // 4. INICIALIZACIÓN (Garantizada)
@@ -210,3 +222,4 @@ document.addEventListener('DOMContentLoaded', () => {
     
     setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
 });
+
