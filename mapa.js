@@ -24,6 +24,41 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
 }).addTo(map);
 
+/**
+ * Función robusta para parsear CSV: Normaliza encabezados y verifica consistencia.
+ */
+function parseCSV(csvString) {
+    const lines = csvString.trim().split('\n');
+    if (lines.length === 0) return [];
+    
+    // Normaliza los encabezados: elimina comillas y espacios para coincidir
+    const headers = lines[0].split(',').map(h => 
+        h.trim().replace(/^"|"$/g, '').replace(/\s+/g, '_')
+    );
+    
+    // Si los encabezados son 'ID GEOJSON' y 'PDF ID', ahora serán 'ID_GEOJSON' y 'PDF_ID'
+
+    const data = [];
+    console.log('--- ENCABEZADOS LEÍDOS (IMPORTANTE) ---');
+    console.log(headers); // MIRA ESTO EN LA CONSOLA DEL NAVEGADOR
+    console.log('---------------------------------------');
+
+
+    for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',');
+        if (values.length === headers.length) {
+            let obj = {};
+            for (let j = 0; j < headers.length; j++) {
+                obj[headers[j]] = values[j].trim().replace(/^"|"$/g, '');
+            }
+            data.push(obj);
+        } else {
+            console.error(`Error de parseo en la línea ${i + 1}: El número de columnas no coincide.`);
+        }
+    }
+    return data;
+}
+
 // =================================================================
 // 3. FUNCIONES DE ESTILO Y EVENTOS
 // =================================================================
@@ -206,3 +241,4 @@ document.addEventListener('DOMContentLoaded', () => {
     // Opcional: Actualizar el mapa cada 60 segundos para refrescar los datos de la hoja
     // setInterval(actualizarMapa, 60000); 
 });
+
