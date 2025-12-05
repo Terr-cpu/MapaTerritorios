@@ -102,7 +102,7 @@ function manejarClickZona(feature, layer) {
 
     if (datosZona) {
         // CONSTRUCCIÓN DEL ENLACE COMPLETO con el ID de la GSheet
-        const urlImagenCompleta = DRIVE_BASE_URL + datosZona.idpdf;
+        const urlImagenCompleta = DRIVE_BASE_URL + datosZona.pdfid;
         
         popupContent = `
             <h3>Zona: ${idZona}</h3>
@@ -220,3 +220,4 @@ actualizarMapa();
 // 2. Programar la actualización automática (refresco)
 
 setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
+
