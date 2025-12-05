@@ -76,26 +76,26 @@ function manejarClickZona(feature, layer) {
     if (datosZona) {
         popupContent += `<b>Estado:</b> ${datosZona.estado}<br>`;
         
-        if (datosZona.pdfId) {
-            const fileId = datosZona.pdfId;
-            
-            // 1. URL para el ENLACE DIRECTO (formato /file/d/ID/view)
-            const urlEnlaceDirecto = `https://drive.google.com/file/d/${fileId}/view`;
-            
-            // 2. URL para el THUMBNAIL (incrustar la imagen pequeña)
-            const urlThumbnail = `${DRIVE_BASE_URL_THUMB}${fileId}`;
 
-            popupContent += `
-                <hr>
-                <a href="${urlEnlaceDirecto}" target="_blank">
-                    <img src="${urlThumbnail}" alt="Vista previa del documento" style="max-width: 100%; height: auto; border-radius: 4px;">
-                </a>
-                <p><small>Haz clic en la imagen para abrir el documento completo.</small></p>
-                <a href="${urlEnlaceDirecto}" target="_blank">Abrir Documento Completo</a>
-            `;
-        } else {
-            popupContent += '<hr>Sin documento asociado.';
-        }
+  if (datosZona.pdfId) {
+    const fileId = datosZona.pdfId.trim();
+
+    // URL del thumbnail (solo esto)
+    const urlThumbnail = `${DRIVE_BASE_URL_THUMB}${fileId}`;
+
+    popupContent += `
+        <hr>
+        <p><b>Vista previa (thumbnail):</b></p>
+        <img src="${urlThumbnail}"
+             alt="Thumbnail"
+             style="width:100%; max-height:300px; object-fit:cover; border-radius:6px;"
+             onerror="this.style.display='none'">
+        <p><small>Si no aparece la miniatura, comprueba que la ID en la hoja es correcta.</small></p>
+    `;
+} else {
+    popupContent += '<hr>Sin documento asociado.';
+}
+
     } else {
         popupContent += '<hr>Datos no encontrados en GSheet para esta zona.';
     }
@@ -193,3 +193,4 @@ document.addEventListener('DOMContentLoaded', () => {
     
     setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
 });
+
