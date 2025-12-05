@@ -60,40 +60,49 @@ function styleZona(feature) {
     };
 }
 
-/** Muestra el contenido del popup (Incluye IFRAME de Drive). */
+/**
+ * Muestra el contenido del popup (Ahora usa Thumbnail y Link).
+ */
 function manejarClickZona(feature, layer) {
-    const idZona = feature.properties.Name.trim(); 
-    const datosZona = estadoZonas[idZona];
-    
-    let popupContent = `<h4>Zona: ${idZona}</h4>`;
+    const idZona = feature.properties.Name.trim(); 
+    const datosZona = estadoZonas[idZona];
+    
+    let popupContent = `<h4>Zona: ${idZona}</h4>`;
 
-    if (datosZona) {
-        popupContent += `<b>Estado:</b> ${datosZona.estado}<br>`;
-        
-        if (datosZona.pdfId) {
-            const fileId = datosZona.pdfId;
-            const urlVistaPrevia = `${DRIVE_BASE_URL_FILE}${fileId}/preview`;
+    if (datosZona) {
+        popupContent += `<b>Estado:</b> ${datosZona.estado}<br>`;
+        
+        if (datosZona.pdfId) {
+            const fileId = datosZona.pdfId;
+            
+            // 1. URL para el ENLACE (permite ver el PDF/Imagen en el navegador)
+            const urlEnlaceDirecto = `https://drive.google.com/file/d/${fileId}/view`;
+            
+            // 2. URL para el THUMBNAIL (incrustar la imagen pequeña en el popup)
+            const urlThumbnail = `${DRIVE_BASE_URL_THUMB}${fileId}`;
 
-            popupContent += `
-                <hr>
-                <p>Documento (ID: ${fileId}):</p>
-                <iframe src="${urlVistaPrevia}" style="width:100%; height:300px; border:0;" allow="autoplay"></iframe>
-                <a href="${urlVistaPrevia}" target="_blank">Abrir en Pestaña Nueva</a>
-            `;
-        } else {
-            popupContent += '<hr>Sin documento asociado.';
-        }
-    } else {
-        popupContent += '<hr>Datos no encontrados en GSheet para esta zona.';
-    }
+            popupContent += `
+                <hr>
+                <a href="${urlEnlaceDirecto}" target="_blank">
+                    <img src="${urlThumbnail}" alt="Vista previa del documento" style="max-width: 100%; height: auto; border-radius: 4px;">
+                </a>
+                <p><small>Haz clic en la imagen para abrir el documento completo.</small></p>
+                <a href="${urlEnlaceDirecto}" target="_blank">Abrir Documento Completo</a>
+            `;
+        } else {
+            popupContent += '<hr>Sin documento asociado.';
+        }
+    } else {
+        popupContent += '<hr>Datos no encontrados en GSheet para esta zona.';
+    }
 
-    layer.bindPopup(popupContent);
-    
-    layer.on({
-        mouseover: (e) => e.target.setStyle({ weight: 5, color: '#666', fillOpacity: 0.9 }),
-        mouseout: (e) => geoJsonLayer.resetStyle(e.target),
-        click: (e) => map.fitBounds(e.target.getBounds())
-    });
+    layer.bindPopup(popupContent);
+    
+    layer.on({
+        mouseover: (e) => e.target.setStyle({ weight: 5, color: '#666', fillOpacity: 0.9 }),
+        mouseout: (e) => geoJsonLayer.resetStyle(e.target),
+        click: (e) => map.fitBounds(e.target.getBounds())
+    });
 }
 
 function cargarGeoJson(url) {
@@ -181,4 +190,5 @@ document.addEventListener('DOMContentLoaded', () => {
     
     setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
 });
+
 
