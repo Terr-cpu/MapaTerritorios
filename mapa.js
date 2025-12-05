@@ -5,7 +5,7 @@
 // Reemplaza estos valores con tus URLs
 const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9XDZiBWcTtcYhYY_zav7eMzBT9H9NzP-9-pa4gmXdb-81r7JNC9aTVluoUKdxt1nDsjqaLwDGGvaN/pub?gid=1216622820&single=true&output=csv';
 const GEOJSON_URL = 'zonas.geojson'; 
-const DRIVE_BASE_URL = 'https://drive.google.com/uc?export=view&id='; // Formato de vista directa de Drive
+const DRIVE_BASE_URL = 'https://drive.google.com/uc?id=''; // Formato de vista directa de Drive
 
 // Variables globales (declaradas aquí, inicializadas en DOMContentLoaded)
 let estadoZonas = {};
@@ -113,6 +113,7 @@ function manejarClickZona(feature, layer) {
     // CORRECCIÓN 3: Usamos 'Name' del GeoJSON
     const idZona = feature.properties.Name; 
     const datosZona = estadoZonas[idZona];
+
     
     let popupContent = `<h4>Zona: ${idZona}</h4>`;
 
@@ -121,10 +122,17 @@ function manejarClickZona(feature, layer) {
         
         // La propiedad 'pdfId' es la que guardamos en actualizarMapa()
         if (datosZona.pdfId) {
-            const urlImagenCompleta = DRIVE_BASE_URL + datosZona.pdfId;
-            popupContent += `<hr><a href="${urlImagenCompleta}" target="_blank">Ver Documento (ID: ${datosZona.pdfId})</a>`;
-            // NOTA: Para mostrar la imagen directamente en el pop-up (si es JPG/PNG):
-            // popupContent += `<img src="${urlImagenCompleta}" alt="Documento de la zona" style="max-width: 100%;">`;
+const fileId = datosZona.pdfId;
+// URL de vista previa directa (más fiable para el 404)
+const urlVistaPrevia = `https://drive.google.com/file/d/${fileId}/preview`;
+
+popupContent += `
+    <hr>
+    <p>Documento (ID: ${fileId}):</p>
+    <iframe src="${urlVistaPrevia}" style="width:100%; height:300px; border:0;" allow="autoplay"></iframe>
+    <a href="${urlVistaPrevia}" target="_blank">Abrir en Pestaña Nueva</a>
+`;
+// La imagen no funcionará si es PDF, pero el iframe cargará el visor de Google.
         } else {
             popupContent += '<hr>Sin documento asociado.';
         }
@@ -253,4 +261,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Programar la actualización automática (refresco)
     setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
 });
+
 
