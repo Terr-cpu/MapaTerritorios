@@ -167,9 +167,9 @@ async function actualizarMapa() {
             const idBruto = r.id_geojson;
 
             // 🔥 NORMALIZACIÓN CRÍTICA — elimina ceros iniciales
-            const id = idBruto
-                ? String(parseInt(idBruto.trim(), 10)) // "007" → "7"
-                : null;
+           // Mantener el ID exactamente como viene ("001", "007", "016")
+const id = idBruto ? idBruto.trim() : null;
+
 
             if (id) {
                 estadoZonas[id] = {
@@ -205,3 +205,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
 });
+
