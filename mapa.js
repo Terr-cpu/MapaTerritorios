@@ -23,19 +23,26 @@ const TIEMPO_REFRESCO_MS = 5 * 60 * 1000; 
 /**
  * Función robusta para parsear el CSV de Google Sheets.
  */
+/**
+ * Función robusta para parsear CSV: Normaliza encabezados y extrae datos.
+ */
 function parseCSV(csvString) {
-    const lines = csvString.trim().split('\n');
+    // 1. Elimina espacios en blanco y líneas vacías al inicio y final
+    let lines = csvString.trim().split('\n');
     if (lines.length === 0) return [];
     
-    // Normaliza los encabezados (elimina espacios y comillas)
+    // 2. Filtra líneas vacías o con solo espacios.
+    lines = lines.filter(line => line.trim().length > 0);
+    if (lines.length === 0) return [];
+
+    // Normaliza los encabezados (la primera línea)
     const headers = lines[0].split(',').map(h => 
-        h.trim().replace(/^"|"$/g, '').replace(/\s+/g, '_')
+        h.trim().replace(/^"|"$/g, '').replace(/\s+/g, '_').toUpperCase() // Convertimos a MAYÚSCULAS
     );
 
     const data = [];
     
-    // NOTA: Para diagnosticar errores de encabezado, descomenta temporalmente:
-    // console.log('ENCABEZADOS LEÍDOS:', headers);
+    // console.log('ENCABEZADOS LEÍDOS (MAYÚS):', headers); // Diagnóstico
 
     for (let i = 1; i < lines.length; i++) {
         const values = lines[i].split(',');
@@ -46,7 +53,7 @@ function parseCSV(csvString) {
             }
             data.push(obj);
         } else {
-            // console.error(`Error de parseo en la línea ${i + 1}: El número de columnas no coincide.`);
+            // console.error(`Error de parseo en la línea ${i + 1}: Columnas no coinciden.`);
         }
     }
     return data;
@@ -246,3 +253,4 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Programar la actualización automática (refresco)
     setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
 });
+
