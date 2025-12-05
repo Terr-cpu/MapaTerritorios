@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Interactivo de Zonas</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        /* Estilos básicos para el contenedor del mapa */
+        #mapa { 
+            height: 100vh; /* Altura de toda la pantalla */
+            width: 100%;
+        }
+        /* Estilo para que la imagen dentro del pop-up no sea demasiado grande */
+        .leaflet-popup-content img {
+            max-width: 250px; /* Tamaño máximo para la imagen en el pop-up */
+            height: auto;
+            display: block;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="mapa"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="mapa.js"></script>
+
+</body>
+</html>
