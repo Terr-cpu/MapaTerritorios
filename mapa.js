@@ -3,7 +3,7 @@
 // =================================================================
 
 // 🚨 URL de la Google Sheet publicada en formato CSV
-const GOOGLE_SHEET_URL ='https://docs.google.com/spreadsheets/d/1NMjJQ4Q-w3NjODwHB4Ti5WwVYMYc5eUAPoSOeWNUDT/gviz/tq?tqx=out:csv&sheet=terr';
+const GOOGLE_SHEET_URL ='https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9XDZiBWcTtcYhYY_zav7eMzBT9H9NzP-9-pa4gmXdb-81r7JNC9aTVluoUKdxt1nDsjqaLwDGGvaN/pub?output=csv';
 const GEOJSON_URL = 'zonas.geojson'; 
 
 // ✅ CORRECCIÓN FINAL DE LA URL: Formato /file/d/ID/preview
@@ -222,5 +222,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
 });
+
 
 
