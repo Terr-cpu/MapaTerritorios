@@ -2,14 +2,16 @@
 // 1. CONFIGURACIÓN GLOBAL
 // =================================================================
 
-// 🚨 URL de la Google Sheet publicada en formato CSV
-const GOOGLE_SHEET_URL ='https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9XDZiBWcTtcYhYY_zav7eMzBT9H9NzP-9-pa4gmXdb-81r7JNC9aTVluoUKdxt1nDsjqaLwDGGvaN/pub?output=csv';
+// 🚨 NUEVA URL DE LA HOJA DE CÁLCULO EN FORMATO JSON
+// EJEMPLO: 'https://spreadsheets.google.com/feeds/list/ID_DOCUMENTO/ID_HOJA/public/values?alt=json'
+const GOOGLE_SHEET_URL = 'https://spreadsheets.google.com/feeds/list/1vQ9XDZiBWcTtcYhYY_zav7eMzBT9H9NzP-9-pa4gmXdb-81r7JNC9aTVluoUKdxt1nDsjqaLwDGGvaN/1216622820/public/values?alt=json';
+
 const GEOJSON_URL = 'zonas.geojson'; 
 
-// ✅ CORRECCIÓN FINAL DE LA URL: Formato /file/d/ID/preview
+// Formato de vista previa de Drive (el más fiable para incrustar)
 const DRIVE_BASE_URL_FILE = 'https://drive.google.com/file/d/';
 
-const MAPA_ID = 'mapa'; // Debe coincidir con el ID del <div> en index.html
+const MAPA_ID = 'mapa'; 
 const TIEMPO_REFRESCO_MS = 5 * 60 * 1000; 
 
 // Variables globales para el estado y capas
@@ -18,37 +20,8 @@ let geoJsonLayer = null;
 let map = null; 
 
 // =================================================================
-// 2. FUNCIONES AUXILIARES (Datos y Estilos)
+// 2. FUNCIONES DE ESTILO Y EVENTOS
 // =================================================================
-
-/**
- * Función simple para parsear CSV (Sin forzar mayúsculas).
- */
-/**
- * Función robusta para parsear CSV: Limpia y normaliza encabezados a MINÚSCULAS.
- */
-function parseCSV(csvString) {
-    let lines = csvString.trim().split('\n').filter(line => line.trim().length > 0);
-    if (lines.length === 0) return [];
-    
-    // Normaliza encabezados a MINÚSCULAS y reemplaza espacios por '_'
-    const headers = lines[0].split(',').map(h => 
-        h.trim().replace(/^"|"$/g, '').toLowerCase().replace(/\s+/g, '_')
-    );
-
-    const data = [];
-    for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',');
-        if (values.length === headers.length) {
-            let obj = {};
-            for (let j = 0; j < headers.length; j++) {
-                obj[headers[j]] = values[j].trim().replace(/^"|"$/g, '');
-            }
-            data.push(obj);
-        }
-    }
-    return data;
-}
 
 /**
  * Retorna el color de relleno basado en el estado.
@@ -72,7 +45,8 @@ function obtenerColorEstado(estado) {
  * Define el estilo visual de la zona.
  */
 function styleZona(feature) {
-    const idZona = feature.properties.Name.trim(); // Clave del GeoJSON
+    // Lectura de la ID de la zona: debe coincidir con la propiedad GeoJSON ('Name')
+    const idZona = feature.properties.Name.trim(); 
     const datosZona = estadoZonas[idZona];
 
     let fillColor = obtenerColorEstado('No Definido'); 
@@ -100,7 +74,7 @@ function styleZona(feature) {
  * Muestra el contenido del popup (Incluye IFRAME de Drive).
  */
 function manejarClickZona(feature, layer) {
-    const idZona = feature.properties.Name.trim(); // Clave del GeoJSON
+    const idZona = feature.properties.Name.trim(); 
     const datosZona = estadoZonas[idZona];
     
     let popupContent = `<h4>Zona: ${idZona}</h4>`;
@@ -111,7 +85,7 @@ function manejarClickZona(feature, layer) {
         if (datosZona.pdfId) {
             const fileId = datosZona.pdfId;
             
-            // ✅ CORRECCIÓN FINAL: Construcción de la URL /file/d/ID/preview
+            // Construcción de la URL /file/d/ID/preview
             const urlVistaPrevia = `${DRIVE_BASE_URL_FILE}${fileId}/preview`;
 
             popupContent += `
@@ -124,7 +98,7 @@ function manejarClickZona(feature, layer) {
             popupContent += '<hr>Sin documento asociado.';
         }
     } else {
-        popupContent += '<hr>Datos no encontrados en GSheet para esta zona. (Verifique IDs)';
+        popupContent += '<hr>Datos no encontrados en GSheet para esta zona.';
     }
 
     layer.bindPopup(popupContent);
@@ -157,31 +131,38 @@ function cargarGeoJson(url) {
         .catch(error => console.error('Error al cargar el GeoJSON:', error));
 }
 
+
+// =================================================================
+// 3. CARGA DE DATOS PRINCIPAL (JSON)
+// =================================================================
+
 /**
- * Obtiene los datos de la hoja de cálculo y actualiza el estado.
+ * Obtiene los datos de la hoja de cálculo usando el formato JSON de Google Sheets.
  */
 async function actualizarMapa() {
-    console.log('Buscando actualizaciones en GSheet...');
+    console.log('Buscando actualizaciones en GSheet vía JSON...');
     try {
         const response = await fetch(GOOGLE_SHEET_URL);
-        const csvText = await response.text();
-        const registros = parseCSV(csvText); // Usamos la función parseCSV normalizada
+        const data = await response.json(); // Leemos directamente el JSON
+        
+        // Los registros de fila están en data.feed.entry
+        const registros = data.feed.entry; 
 
         estadoZonas = {};
 
         registros.forEach(registro => {
-            // ✅ SOLUCIÓN FINAL: Buscamos las claves en MINÚSCULAS
+            // 🚨 Acceso a las propiedades JSON de Google (gsx$nombre_columna_sin_espacios.$t)
             
-            // 1. Clave de la Zona: Buscamos 'id_geojson' (normalizado)
-            const idBruto = registro.id_geojson; 
+            // 1. Clave de la Zona: Buscamos 'gsx$id_geojson.$t'
+            const idBruto = registro.gsx$id_geojson.$t; 
             const idGeoJson = idBruto ? idBruto.trim() : null;
 
             if (idGeoJson) {
                 estadoZonas[idGeoJson] = {
-                    // 2. Estado: Buscamos 'estado' (normalizado)
-                    estado: registro.estado, 
-                    // 3. ID de Drive: Buscamos 'pdf_id' (normalizado)
-                    pdfId: registro.pdf_id 
+                    // 2. Estado
+                    estado: registro.gsx$estado.$t, 
+                    // 3. ID de Drive
+                    pdfId: registro.gsx$pdfid.$t 
                 };
             }
         });
@@ -194,16 +175,14 @@ async function actualizarMapa() {
         }
         
     } catch (error) {
-        console.error('Error al obtener datos de la hoja de cálculo:', error);
+        console.error('Error al obtener datos de la hoja de cálculo. Falló el JSON fetch:', error);
     }
 }
-
 
 // =================================================================
 // 4. INICIALIZACIÓN (Garantizada)
 // =================================================================
 
-// 🚨 La inicialización ocurre aquí, después de la carga del DOM
 document.addEventListener('DOMContentLoaded', () => {
     
     // Inicialización del mapa
@@ -222,6 +201,3 @@ document.addEventListener('DOMContentLoaded', () => {
     
     setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
 });
-
-
-
