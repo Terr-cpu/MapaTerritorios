@@ -6,9 +6,7 @@
 const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbxym4UsG7Afk3sRLVmtHFAFoGbAMTomgpvbkxyUdaKA5oHgHsi2LmaVOoewOXw_6v0/exec';
 
 const GEOJSON_URL = 'zonas.geojson'; 
-
-// ✅ SOLO USAMOS LA CONSTANTE DEL THUMBNAIL (Imagen pequeña)
-const DRIVE_BASE_URL_THUMB = 'https://drive.google.com/thumbnail?sz=w300&id=';
+const DRIVE_BASE_URL_FILE = 'https://drive.google.com/file/d/';
 
 const MAPA_ID = 'mapa'; 
 const TIEMPO_REFRESCO_MS = 5 * 60 * 1000; 
@@ -38,11 +36,7 @@ function obtenerColorEstado(estado) {
 
 /** Define el estilo visual de la zona. */
 function styleZona(feature) {
-    // Lectura de la ID de la zona: debe coincidir con la propiedad GeoJSON ('Name')
-    const idBruto = feature.properties.Name; 
-    
-    // ✅ CLAVE: Limpieza rigurosa para asegurar que "001" coincide con "001"
-    const idZona = String(idBruto).trim(); 
+    const idZona = feature.properties.Name.trim(); 
     const datosZona = estadoZonas[idZona];
 
     let fillColor = obtenerColorEstado('No Definido'); 
@@ -66,53 +60,51 @@ function styleZona(feature) {
     };
 }
 
-/** Muestra el contenido del popup (Ahora usa Thumbnail y Link). */
+/**
+ * Muestra el contenido del popup (Ahora usa Thumbnail y Link).
+ */
 function manejarClickZona(feature, layer) {
-    const idBruto = feature.properties.Name; 
-    
-    // ✅ CLAVE: Limpieza rigurosa para asegurar que "001" coincide con "001"
-    const idZona = String(idBruto).trim(); 
-    
-    let popupContent = `<h4>Zona: ${idZona}</h4>`;
+    const idZona = feature.properties.Name.trim(); 
     const datosZona = estadoZonas[idZona];
+    
+    let popupContent = `<h4>Zona: ${idZona}</h4>`;
 
-    if (datosZona) {
-        popupContent += `<b>Estado:</b> ${datosZona.estado}<br>`;
-        
-        if (datosZona.pdfId) {
-            const fileId = datosZona.pdfId;
-            
-            // 1. URL para el ENLACE DIRECTO (usamos el formato file/d/ para que abra el PDF/Imagen)
-            const urlEnlaceDirecto = `https://drive.google.com/file/d/${fileId}/view`;
-            
-            // 2. URL para el THUMBNAIL (incrustar la imagen pequeña en el popup)
-            const urlThumbnail = `${DRIVE_BASE_URL_THUMB}${fileId}`;
+    if (datosZona) {
+        popupContent += `<b>Estado:</b> ${datosZona.estado}<br>`;
+        
+        if (datosZona.pdfId) {
+            const fileId = datosZona.pdfId;
+            
+            // 1. URL para el ENLACE (permite ver el PDF/Imagen en el navegador)
+            const urlEnlaceDirecto = `https://drive.google.com/file/d/${fileId}/view`;
+            
+            // 2. URL para el THUMBNAIL (incrustar la imagen pequeña en el popup)
+            const urlThumbnail = `${DRIVE_BASE_URL_THUMB}${fileId}`;
 
-            popupContent += `
-                <hr>
-                <a href="${urlEnlaceDirecto}" target="_blank">
-                    <img src="${urlThumbnail}" alt="Vista previa del documento" style="max-width: 100%; height: auto; border-radius: 4px;">
-                </a>
-                <p><small>Haz clic en la imagen para abrir el documento completo.</small></p>
-                <a href="${urlEnlaceDirecto}" target="_blank">Abrir Documento Completo</a>
-            `;
-        } else {
-            popupContent += '<hr>Sin documento asociado.';
-        }
-    } else {
-        popupContent += '<hr>Datos no encontrados en GSheet para esta zona.';
-    }
+            popupContent += `
+                <hr>
+                <a href="${urlEnlaceDirecto}" target="_blank">
+                    <img src="${urlThumbnail}" alt="Vista previa del documento" style="max-width: 100%; height: auto; border-radius: 4px;">
+                </a>
+                <p><small>Haz clic en la imagen para abrir el documento completo.</small></p>
+                <a href="${urlEnlaceDirecto}" target="_blank">Abrir Documento Completo</a>
+            `;
+        } else {
+            popupContent += '<hr>Sin documento asociado.';
+        }
+    } else {
+        popupContent += '<hr>Datos no encontrados en GSheet para esta zona.';
+    }
 
-    layer.bindPopup(popupContent);
-    
-    layer.on({
-        mouseover: (e) => e.target.setStyle({ weight: 5, color: '#666', fillOpacity: 0.9 }),
-        mouseout: (e) => geoJsonLayer.resetStyle(e.target),
-        click: (e) => map.fitBounds(e.target.getBounds())
-    });
+    layer.bindPopup(popupContent);
+    
+    layer.on({
+        mouseover: (e) => e.target.setStyle({ weight: 5, color: '#666', fillOpacity: 0.9 }),
+        mouseout: (e) => geoJsonLayer.resetStyle(e.target),
+        click: (e) => map.fitBounds(e.target.getBounds())
+    });
 }
 
-// OTRAS FUNCIONES (sin modificaciones sustanciales)
 function cargarGeoJson(url) {
     fetch(url)
         .then(response => response.json())
@@ -134,48 +126,45 @@ function cargarGeoJson(url) {
 
 
 // =================================================================
-// 3. CARGA DE DATOS PRINCIPAL (APPS SCRIPT - JSONP)
+// 3. CARGA DE DATOS PRINCIPAL (APPS SCRIPT)
 // =================================================================
 
-/** Obtiene los datos de la hoja de cálculo usando el método JSONP (jQuery). */
-function actualizarMapa() {
-    console.log('Buscando actualizaciones en Apps Script con JSONP...');
-    
-    // Reemplaza el método fetch por $.ajax para usar JSONP
-    $.ajax({
-        url: GOOGLE_SHEET_URL,
-        dataType: 'jsonp', // Indica que se usará JSONP
-        success: function(registros) {
-            
-            estadoZonas = {};
+/** Obtiene los datos de la hoja de cálculo usando la URL del Apps Script. */
+async function actualizarMapa() {
+    console.log('Buscando actualizaciones en Apps Script...');
+    try {
+        const response = await fetch(GOOGLE_SHEET_URL);
+        // Leemos la respuesta como JSON puro que el script nos devuelve
+        const registros = await response.json(); 
+        
+        estadoZonas = {};
 
-            registros.forEach(registro => {
-                
-                // La clave del Sheet: 'idgeojson'
-                const idBruto = registro.idgeojson; 
-                
-                // ✅ CLAVE: Limpieza rigurosa para asegurar que "001" coincide con "001"
-                const idGeoJson = String(idBruto).trim(); 
+   registros.forEach(registro => {
+            
+            // 1. Clave de la Zona: Buscamos 'idgeojson'
+            const idBruto = registro.idgeojson; 
+            const idGeoJson = idBruto ? idBruto.trim() : null;
 
-                if (idGeoJson) {
-                    estadoZonas[idGeoJson] = {
-                        estado: registro.estado, 
-                        pdfId: registro.pdfid 
-                    };
-                }
+            if (idGeoJson) {
+                estadoZonas[idGeoJson] = {
+                    // 2. Estado: Buscamos 'estado'
+                    estado: registro.estado, 
+                    // 3. ID de Drive: Buscamos 'pdfid' (la clave de menor caso que aparece en el JSON)
+                    pdfId: registro.pdfid 
+                };
+            }
+        });
+
+        // Repintar las zonas si ya están cargadas
+        if (geoJsonLayer) {
+            geoJsonLayer.eachLayer(layer => {
+                layer.setStyle(styleZona(layer.feature));
             });
-
-            // Repintar las zonas
-            if (geoJsonLayer) {
-                geoJsonLayer.eachLayer(layer => {
-                    layer.setStyle(styleZona(layer.feature));
-                });
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('ERROR CRÍTICO: Falló la conexión JSONP con Apps Script.', status, error);
         }
-    });
+        
+    } catch (error) {
+        console.error('Error al obtener datos del Apps Script. Falló el fetch:', error);
+    }
 }
 
 
@@ -185,9 +174,6 @@ function actualizarMapa() {
 
 document.addEventListener('DOMContentLoaded', () => {
     
-    // ATENCIÓN: Esta línea debe estar en tu index.html ANTES de cargar mapa.js
-    // <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-
     // Inicialización del mapa
     map = L.map(MAPA_ID).setView([37.3355, -5.9282], 13);
 
@@ -204,3 +190,4 @@ document.addEventListener('DOMContentLoaded', () => {
     
     setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
 });
+
