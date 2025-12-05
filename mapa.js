@@ -206,6 +206,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // Opcional: Actualizar el mapa cada 60 segundos para refrescar los datos de la hoja
     // setInterval(actualizarMapa, 60000); 
 });
-
-
-
