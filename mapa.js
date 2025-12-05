@@ -40,6 +40,7 @@ function obtenerColorEstado(estado) {
 function styleZona(feature) {
     // Lectura de la ID del GeoJSON (se asume que es el campo 'Name')
     const idBruto = feature.properties.Name; 
+    // ✅ CLAVE: Limpieza rigurosa para asegurar que "001" coincide con "001"
     const idZona = String(idBruto).trim(); 
     const datosZona = estadoZonas[idZona];
 
@@ -148,7 +149,8 @@ function actualizarMapa() {
                 
                 // 1. La clave del Sheet: 'idgeojson' (minúsculas)
                 const idBruto = registro.idgeojson; 
-                const idGeoJson = String(idBruto).trim(); // Almacenar como "001"
+                // ✅ CLAVE: Limpieza rigurosa para asegurar que "001" coincide con "001"
+                const idGeoJson = String(idBruto).trim(); 
 
                 if (idGeoJson) {
                     estadoZonas[idGeoJson] = {
@@ -157,13 +159,11 @@ function actualizarMapa() {
                     };
                 }
             });
-
-            // Repintar las zonas
-            if (geoJsonLayer) {
-                geoJsonLayer.eachLayer(layer => {
-                    layer.setStyle(styleZona(layer.feature));
-                });
-            }
+            
+            // Si hay datos, forzar el repintado
+            if (Object.keys(estadoZonas).length > 0) {
+                cargarGeoJson(GEOJSON_URL);
+            }
         },
         error: function(xhr, status, error) {
             console.error('ERROR CRÍTICO: Falló la conexión JSONP con Apps Script.', status, error);
@@ -188,8 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }).addTo(map);
 
 
-    // Carga de datos
-    cargarGeoJson(GEOJSON_URL); 
+    // Carga inicial de datos
     actualizarMapa();
     
     setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
