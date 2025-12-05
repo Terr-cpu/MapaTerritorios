@@ -24,6 +24,14 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors'
 }).addTo(map);
 
+// =================================================================
+// 3. FUNCIONES DE ESTILO Y EVENTOS
+// =================================================================
+
+/**
+ * Retorna el color de relleno basado en el estado.
+ */
+
 /**
  * Función robusta para parsear CSV: Normaliza encabezados y verifica consistencia.
  */
@@ -58,14 +66,6 @@ function parseCSV(csvString) {
     }
     return data;
 }
-
-// =================================================================
-// 3. FUNCIONES DE ESTILO Y EVENTOS
-// =================================================================
-
-/**
- * Retorna el color de relleno basado en el estado.
- */
 function obtenerColorEstado(estado) {
     switch (estado) {
         case 'Pendiente': 
@@ -241,4 +241,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // Opcional: Actualizar el mapa cada 60 segundos para refrescar los datos de la hoja
     // setInterval(actualizarMapa, 60000); 
 });
+
 
