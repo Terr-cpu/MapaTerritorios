@@ -6,8 +6,8 @@
 const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9XDZiBWcTtcYhYY_zav7eMzBT9H9NzP-9-pa4gmXdb-81r7JNC9aTVluoUKdxt1nDsjqaLwDGGvaN/pub?gid=1216622820&single=true&output=csv';
 const GEOJSON_URL = 'zonas.geojson'; 
 
-// Formato de vista previa de Drive (el más fiable para incrustar)
-const DRIVE_BASE_URL_PREVIEW = 'https://drive.google.com/file/d/';
+// ✅ CORRECCIÓN FINAL DE LA URL: Formato /file/d/ID/preview
+const DRIVE_BASE_URL_FILE = 'https://drive.google.com/file/d/';
 
 const MAPA_ID = 'mapa'; // Debe coincidir con el ID del <div> en index.html
 const TIEMPO_REFRESCO_MS = 5 * 60 * 1000; 
@@ -15,23 +15,21 @@ const TIEMPO_REFRESCO_MS = 5 * 60 * 1000; 
 // Variables globales para el estado y capas
 let estadoZonas = {};
 let geoJsonLayer = null;
-let map = null; // Inicializado en DOMContentLoaded
+let map = null; 
 
 // =================================================================
 // 2. FUNCIONES AUXILIARES (Datos y Estilos)
 // =================================================================
 
 /**
- * Función robusta para parsear CSV (Normaliza y usa MAYÚSCULAS).
+ * Función simple para parsear CSV (Sin forzar mayúsculas).
  */
 function parseCSV(csvString) {
     let lines = csvString.trim().split('\n').filter(line => line.trim().length > 0);
     if (lines.length === 0) return [];
     
-    // Normaliza encabezados a MAYÚSCULAS para lectura consistente
-    const headers = lines[0].split(',').map(h => 
-        h.trim().replace(/^"|"$/g, '').replace(/\s+/g, '_').toUpperCase()
-    );
+    // Encabezados se leen literal para que coincidan con lo que escribió el usuario
+    const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
 
     const data = [];
     for (let i = 1; i < lines.length; i++) {
@@ -48,7 +46,7 @@ function parseCSV(csvString) {
 }
 
 /**
- * Retorna el color de relleno basado en el estado (ACTIVO/EXPIRADO).
+ * Retorna el color de relleno basado en el estado.
  */
 function obtenerColorEstado(estado) {
     if (typeof estado !== 'string') return '#808080';
@@ -69,7 +67,7 @@ function obtenerColorEstado(estado) {
  * Define el estilo visual de la zona.
  */
 function styleZona(feature) {
-    const idZona = feature.properties.Name; // Usamos 'Name' del GeoJSON
+    const idZona = feature.properties.Name.trim(); // Clave del GeoJSON
     const datosZona = estadoZonas[idZona];
 
     let fillColor = obtenerColorEstado('No Definido'); 
@@ -97,7 +95,7 @@ function styleZona(feature) {
  * Muestra el contenido del popup (Incluye IFRAME de Drive).
  */
 function manejarClickZona(feature, layer) {
-    const idZona = feature.properties.Name; 
+    const idZona = feature.properties.Name.trim(); // Clave del GeoJSON
     const datosZona = estadoZonas[idZona];
     
     let popupContent = `<h4>Zona: ${idZona}</h4>`;
@@ -107,8 +105,9 @@ function manejarClickZona(feature, layer) {
         
         if (datosZona.pdfId) {
             const fileId = datosZona.pdfId;
-            // Construcción de la URL de Drive para el visor seguro
-            const urlVistaPrevia = `${DRIVE_BASE_URL_PREVIEW}${fileId}/preview`;
+            
+            // ✅ CORRECCIÓN FINAL: Construcción de la URL /file/d/ID/preview
+            const urlVistaPrevia = `${DRIVE_BASE_URL_FILE}${fileId}/preview`;
 
             popupContent += `
                 <hr>
@@ -120,26 +119,20 @@ function manejarClickZona(feature, layer) {
             popupContent += '<hr>Sin documento asociado.';
         }
     } else {
-        popupContent += '<hr>Datos no encontrados en GSheet para esta zona.';
+        popupContent += '<hr>Datos no encontrados en GSheet para esta zona. (Verifique IDs)';
     }
 
     layer.bindPopup(popupContent);
     
     layer.on({
-        // Eventos de interacción (mouseover, click)
         mouseover: (e) => e.target.setStyle({ weight: 5, color: '#666', fillOpacity: 0.9 }),
         mouseout: (e) => geoJsonLayer.resetStyle(e.target),
         click: (e) => map.fitBounds(e.target.getBounds())
     });
 }
 
-// =================================================================
-// 3. FUNCIONES DE CARGA Y REFRESCADO
-// =================================================================
 
-/**
- * Carga el archivo GeoJSON y lo añade al mapa.
- */
+// OTRAS FUNCIONES (sin modificaciones sustanciales)
 function cargarGeoJson(url) {
     fetch(url)
         .then(response => response.json())
@@ -159,9 +152,7 @@ function cargarGeoJson(url) {
         .catch(error => console.error('Error al cargar el GeoJSON:', error));
 }
 
-/**
- * Obtiene los datos de la hoja de cálculo y actualiza el estado.
- */
+
 async function actualizarMapa() {
     console.log('Buscando actualizaciones en GSheet...');
     try {
@@ -172,18 +163,19 @@ async function actualizarMapa() {
         estadoZonas = {};
 
         registros.forEach(registro => {
-            // Accedemos a las propiedades en MAYÚSCULAS, según parseCSV
-            const idGeoJson = registro.ID_GEOJSON; 
+            // Asumimos NOMBRES LITERALES para las claves de columna del Sheet
+            
+            // 🚨 ADVERTENCIA: Si tu columna no se llama 'ID_GEOJSON', cámbiala aquí
+            const idGeoJson = registro.ID_GEOJSON.trim(); 
 
             if (idGeoJson) {
                 estadoZonas[idGeoJson] = {
-                    estado: registro.ESTADO, 
-                    pdfId: registro.PDF_ID 
+                    estado: registro.Estado, // Asumimos 'Estado' literal
+                    pdfId: registro.PDF_ID   // Asumimos 'PDF_ID' literal
                 };
             }
         });
 
-        // Repintar las zonas si ya están cargadas
         if (geoJsonLayer) {
             geoJsonLayer.eachLayer(layer => {
                 layer.setStyle(styleZona(layer.feature));
@@ -199,11 +191,11 @@ async function actualizarMapa() {
 // 4. INICIALIZACIÓN (Garantizada)
 // =================================================================
 
-// 🚨 CORRECCIÓN CRÍTICA: Aseguramos la inicialización después de la carga del DOM
+// 🚨 La inicialización ocurre aquí, después de la carga del DOM
 document.addEventListener('DOMContentLoaded', () => {
     
-    // 1. Inicialización del mapa
-    map = L.map(MAPA_ID).setView([37.3355, -5.9282], 13); // Vista centrada en Montequinto
+    // Inicialización del mapa
+    map = L.map(MAPA_ID).setView([37.3355, -5.9282], 13);
 
     // Proveedor de Tiles (Calles)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -212,12 +204,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }).addTo(map);
 
 
-    // 2. Cargar el GeoJSON de las zonas
+    // Carga de datos
     cargarGeoJson(GEOJSON_URL); 
-
-    // 3. Cargar los datos de la hoja de cálculo y actualizar estilos
     actualizarMapa();
     
-    // 4. Programar el refresco
     setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
 });
