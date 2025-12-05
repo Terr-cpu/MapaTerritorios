@@ -70,7 +70,7 @@ function manejarClickZona(feature, layer) {
     const idBruto = feature.properties.Name; 
     const idZona = String(idBruto).trim(); 
     
-    let popupContent = `<h4>Zona: ${idZona}</h4>`;
+    let popupContent = `<h4>Territorio: ${idZona}</h4>`;
     const datosZona = estadoZonas[idZona];
 
     if (datosZona) {
@@ -85,12 +85,11 @@ function manejarClickZona(feature, layer) {
 
     popupContent += `
         <hr>
-        <p><b>Vista previa (thumbnail):</b></p>
+        <p><b>Vista del Territorio):</b></p>
         <img src="${urlThumbnail}"
              alt="Thumbnail"
              style="width:100%; max-height:300px; object-fit:cover; border-radius:6px;"
              onerror="this.style.display='none'">
-        <p><small>Si no aparece la miniatura, comprueba que la ID en la hoja es correcta.</small></p>
     `;
 } else {
     popupContent += '<hr>Sin documento asociado.';
@@ -193,5 +192,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
 });
+
 
 
