@@ -8,7 +8,7 @@ const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbxym4UsG7Afk3s
 const GEOJSON_URL = 'zonas.geojson'; 
 
 // ✅ Constante para generar la URL de la miniatura (thumbnail) de Drive
-const DRIVE_BASE_URL_THUMB = 'https://drive.google.com/thumbnail?sz=w300&id=';
+const DRIVE_BASE_URL_THUMB = 'https://drive.google.com/thumbnail?sz=w1200&id=';
 
 const MAPA_ID = 'mapa'; 
 const TIEMPO_REFRESCO_MS = 5 * 60 * 1000; 
@@ -193,4 +193,5 @@ document.addEventListener('DOMContentLoaded', () => {
     
     setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
 });
+
 
