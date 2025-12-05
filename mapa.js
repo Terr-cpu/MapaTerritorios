@@ -130,19 +130,21 @@ async function actualizarMapa() {
         
         estadoZonas = {};
 
-        registros.forEach(registro => {
-            // Buscamos las claves en MINÚSCULAS y con guion bajo, como las genera el script
+   registros.forEach(registro => {
             
-            const idBruto = registro.id_geojson; 
-            const idGeoJson = idBruto ? idBruto.trim() : null;
+            // 1. Clave de la Zona: Buscamos 'idgeojson'
+            const idBruto = registro.idgeojson; 
+            const idGeoJson = idBruto ? idBruto.trim() : null;
 
-            if (idGeoJson) {
-                estadoZonas[idGeoJson] = {
-                    estado: registro.estado, 
-                    pdfId: registro.pdfid 
-                };
-            }
-        });
+            if (idGeoJson) {
+                estadoZonas[idGeoJson] = {
+                    // 2. Estado: Buscamos 'estado'
+                    estado: registro.estado, 
+                    // 3. ID de Drive: Buscamos 'pdfid' (la clave de menor caso que aparece en el JSON)
+                    pdfId: registro.pdfid 
+                };
+            }
+        });
 
         // Repintar las zonas si ya están cargadas
         if (geoJsonLayer) {
@@ -179,3 +181,4 @@ document.addEventListener('DOMContentLoaded', () => {
     
     setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
 });
+
