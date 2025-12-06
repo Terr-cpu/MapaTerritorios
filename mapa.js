@@ -230,7 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
 L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
   maxZoom: 19,
   attribution: "&copy; Carto"
-});
+};
 
  // L.tileLayer(
   //  "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
@@ -238,7 +238,7 @@ L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
     //  maxZoom: 19,
     //  attribution: "Map data © OpenStreetMap",
  //   }
- // ).addTo(map);
+ ).addTo(map);
 
   actualizarMapa();
   setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
