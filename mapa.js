@@ -152,7 +152,7 @@ function abrirPanel(idZona, fileId, estado) {
     // ----- WEB APP -----
     // Puedes añadir parámetros GET como id, estado, etc.
     // ----- ENLACE A WEB APP -----
-const webAppURL = `https://script.google.com/macros/s/AKfycbxym4UsG7Afk3sRLVmtHFAFoGbAMTomgpvbkxyUdaKA5oHgHsi2LmaVOoewOXw_6v0/exec?fila=${idZona}`;
+const webAppURL = `https://script.google.com/macros/s/AKfycbxoDr8Cu3iFlAPX749WFJunR7cVpaoDO0RskbuoIykmY6rz0wJeCq6D_Nvr8MTWISmRgw/exec?fila=${idZona}`;
 
 const link = document.getElementById("panel-webapp-link");
 link.href = webAppURL;
