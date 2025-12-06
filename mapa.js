@@ -201,21 +201,27 @@ function abrirPanel(idZona, fileId, estado) {
     // Ajustar tamaño del mapa (muy importante para móvil)
     setTimeout(() => {
         map.invalidateSize();
-    }, 300);
+    }, 350);
+
+    // Desplazar el mapa visualmente a la izquierda cuando el panel se abre
+    setTimeout(() => {
+        map.panBy([-120, 0], { animate: true });
+    }, 450);
 }
-
-
 
 // =================================================================
 // 4. INICIALIZACIÓN (Garantizada)
 // =================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    
+    map.fitBounds(geoJsonLayer.getBounds(), { padding: [20, 20], animate: true });
+
     // Inicialización del mapa
     map = L.map(MAPA_ID).setView([37.3355, -5.9282], 15);
 
-    setTimeout(() => map.invalidateSize(), 400);
+   setTimeout(() => {
+    map.invalidateSize();
+}, 500);
 
     // Proveedor de Tiles (Calles)
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -231,23 +237,34 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 });
 
 // Cerrar panel lateral y restaurar vista general
-// Cerrar panel lateral y restaurar vista general
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("panel-cerrar").addEventListener("click", () => {
 
         document.getElementById("panel-detalle").classList.remove("activo");
 
-        // Restaurar vista general (solo ajustar a los polígonos, sin zoomOut extra)
+        // Restaurar vista general (solo ajustar a los polígonos)
         if (geoJsonLayer) {
             const bounds = geoJsonLayer.getBounds();
             map.fitBounds(bounds, { padding: [20, 20], animate: true });
 
-            // Importante: reajustar tamaño para móvil
+            // Reajustar tamaño móvil
             setTimeout(() => map.invalidateSize(), 300);
+
+            // Acercar un poco la vista para que no quede tan lejos
+            setTimeout(() => {
+                map.zoomIn(1);
+            }, 550);
+
+            // Desplazar mapa hacia la derecha, recuperando la posición original
+            setTimeout(() => {
+                map.panBy([120, 0], { animate: true });
+            }, 650);
         }
 
     });
 });
+
+
 
 
 
