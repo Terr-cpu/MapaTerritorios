@@ -227,9 +227,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   setTimeout(() => map.invalidateSize(), 300);
 
-  L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+L.tileLayer("https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png", {
   maxZoom: 20,
-  attribution: "Tiles © Esri"
+  attribution: "&copy; Stamen"
 });
 
  // L.tileLayer(
