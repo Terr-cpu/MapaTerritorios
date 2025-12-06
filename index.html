@@ -6,21 +6,80 @@
     <title>Mapa Interactivo de Zonas</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <style>
-        /* Estilos básicos para el contenedor del mapa */
-        #mapa { 
-            height: 100vh; /* Altura de toda la pantalla */
-            width: 100%;
+        <style>
+    /* ===============================
+       MAPA RESPONSIVE
+    =============================== */
+
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+    }
+
+    #mapa {
+        height: 100vh;
+        width: 100vw;
+        max-width: 100%;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ===============================
+       POPUPS – ESTILO PROFESIONAL
+    =============================== */
+
+    .leaflet-popup-content-wrapper {
+        border-radius: 12px;
+        box-shadow: 0 4px 25px rgba(0,0,0,0.25);
+        padding: 8px;
+    }
+
+    .leaflet-popup-content {
+        font-size: 15px;
+        line-height: 1.35;
+        margin: 5px;
+    }
+
+    .leaflet-popup-tip {
+        background: white;
+    }
+
+    /* Imagen dentro del popup RESPONSIVE */
+    .leaflet-popup-content img {
+        width: 100% !important;
+        height: auto !important;
+        max-height: 300px;
+        object-fit: contain;
+        border-radius: 8px;
+        display: block;
+        margin: 8px 0;
+        background: #f0f0f0;
+    }
+
+    /* ===============================
+       MÓVILES
+    =============================== */
+    
+    @media (max-width: 600px) {
+
+        #mapa {
+            height: calc(100vh - 10px);
         }
-        /* Estilo para que la imagen dentro del pop-up no sea demasiado grande */
+        
+        .leaflet-popup-content {
+            font-size: 14px;
+        }
+        
         .leaflet-popup-content img {
-            max-width: 250px; /* Tamaño máximo para la imagen en el pop-up */
-            height: auto;
-            display: block;
-            margin-top: 10px;
-            border-radius: 5px;
+            max-height: 200px;
         }
-    </style>
+    }
+</style>
+    
 </head>
 <body>
 
@@ -32,3 +91,4 @@
 </body>
 
 </html>
+
