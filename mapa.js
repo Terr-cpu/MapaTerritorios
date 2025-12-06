@@ -174,6 +174,8 @@ function cargarGeoJson(url) {
         style: styleZona,
         onEachFeature: manejarClickZona,
       }).addTo(map);
+      
+      aplicarMascara();
 
       map.setView(VISTA_GENERAL.centro, VISTA_GENERAL.zoom, {
         animate: true,
@@ -181,6 +183,53 @@ function cargarGeoJson(url) {
     })
     .catch((error) => console.error("Error al cargar el GeoJSON:", error));
 }
+
+function aplicarMascara() {
+
+    if (!geoJsonLayer) return;
+
+    // Obtener límites de ALL el mundo
+    const worldBounds = [
+        [-90, -360],
+        [-90, 360],
+        [90, 360],
+        [90, -360]
+    ];
+
+    // Unir todos los polígonos reales en un multi-geom
+    const zonas = [];
+
+    geoJsonLayer.eachLayer((layer) => {
+        if (layer.feature && layer.feature.geometry) {
+            zonas.push(layer.feature.geometry);
+        }
+    });
+
+    // Crear geometría invertida
+    const mask = {
+        type: "Feature",
+        properties: {},
+        geometry: {
+            type: "Polygon",
+            coordinates: [
+                worldBounds,
+                ...zonas.map(z => z.coordinates[0]) // cada zona recorta la máscara
+            ]
+        }
+    };
+
+    // Colocar capa oscurecida encima del mapa
+    L.geoJSON(mask, {
+        style: () => ({
+            color: "black",
+            fillColor: "black",
+            fillOpacity: 0.45,   // oscurecimiento
+            weight: 0
+        }),
+        interactive: false
+    }).addTo(map);
+}
+
 
 // =================================================================
 // 6. Cargar datos del Sheet (JSONP)
