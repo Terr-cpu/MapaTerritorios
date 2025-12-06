@@ -227,13 +227,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   setTimeout(() => map.invalidateSize(), 300);
 
-  L.tileLayer(
-    "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-    {
-      maxZoom: 19,
-      attribution: "Map data © OpenStreetMap",
-    }
-  ).addTo(map);
+  L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+  maxZoom: 20,
+  attribution: "Tiles © Esri"
+});
+
+ // L.tileLayer(
+  //  "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+   // {
+    //  maxZoom: 19,
+    //  attribution: "Map data © OpenStreetMap",
+ //   }
+ // ).addTo(map);
 
   actualizarMapa();
   setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
