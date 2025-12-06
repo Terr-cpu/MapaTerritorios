@@ -151,11 +151,12 @@ function abrirPanel(idZona, fileId, estado) {
 
     // ----- WEB APP -----
     // Puedes añadir parámetros GET como id, estado, etc.
-    const webAppURL = `https://script.google.com/macros/s/AKfycbxoDr8Cu3iFlAPX749WFJunR7cVpaoDO0RskbuoIykmY6rz0wJeCq6D_Nvr8MTWISmRgw/exec?id=${idZona}`;
+    // ----- ENLACE A WEB APP -----
+const webAppURL = `https://script.google.com/macros/s/AKfycbxym4UsG7Afk3sRLVmtHFAFoGbAMTomgpvbkxyUdaKA5oHgHsi2LmaVOoewOXw_6v0/exec?fila=${idZona}`;
 
-    const webFrame = document.getElementById("panel-webapp");
-    webFrame.src = webAppURL;
-    webFrame.style.display = "block";
+const link = document.getElementById("panel-webapp-link");
+link.href = webAppURL;
+link.style.display = "block";
 
     // ----- MOSTRAR PANEL -----
     document.getElementById("panel-detalle").classList.add("activo");
@@ -258,9 +259,9 @@ document.getElementById("panel-cerrar").addEventListener("click", () => {
     document.getElementById("panel-detalle").classList.remove("activo");
 
     // Ocultar Web App
-    const webFrame = document.getElementById("panel-webapp");
-    webFrame.style.display = "none";
-    webFrame.src = "";
+    // Ocultar botón WebApp
+document.getElementById("panel-webapp-link").style.display = "none";
+
 
     // Ocultar imagen
     document.getElementById("panel-imagen").style.display = "none";
