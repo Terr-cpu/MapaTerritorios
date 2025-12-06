@@ -67,42 +67,37 @@ function styleZona(feature) {
 
 /** Muestra el contenido del popup (Incluye Thumbnail y Link). */
 function manejarClickZona(feature, layer) {
-    const idBruto = feature.properties.Name; 
+    const idBruto = feature.properties.Name;
     const idZona = String(idBruto).trim();
-    
-    let popupContent = `<h4>Territorio: ${idZona}</h4>`;
     const datosZona = estadoZonas[idZona];
 
-    if (datosZona) {
-        popupContent += `<b>Estado:</b> ${datosZona.estado}<br><br>`;
-
-        if (datosZona.pdfId) {
-            const fileId = datosZona.pdfId.trim();
-
-            // Botón que abre el panel lateral
-            popupContent += `
-                <button onclick="abrirPanel('${idZona}', '${fileId}', '${datosZona.estado}')" 
-                    style="background:#0057b8;color:white;border:none;padding:8px 12px;
-                           border-radius:6px;cursor:pointer;">
-                    Ver detalles
-                </button>
-            `;
-        } else {
-            popupContent += '<hr>Sin documento asociado.';
-        }
-
-    } else {
-        popupContent += '<hr>Datos no encontrados en GSheet para esta zona.';
-    }
-
-    layer.bindPopup(popupContent);
-    
     layer.on({
         mouseover: (e) => e.target.setStyle({ weight: 5, color: '#666', fillOpacity: 0.9 }),
         mouseout: (e) => geoJsonLayer.resetStyle(e.target),
-        click: (e) => map.fitBounds(e.target.getBounds())
+        click: (e) => {
+
+            // Ajustar zoom a la zona
+            map.fitBounds(e.target.getBounds());
+
+            // Si tenemos datos, abrimos el panel directamente
+            if (datosZona && datosZona.pdfId) {
+                abrirPanel(
+                    idZona,
+                    datosZona.pdfId.trim(),
+                    datosZona.estado
+                );
+            } else {
+                // Panel con aviso si no hay datos
+                abrirPanel(
+                    idZona,
+                    null,
+                    datosZona ? datosZona.estado : "Sin datos"
+                );
+            }
+        }
     });
 }
+
 
 
 function cargarGeoJson(url) {
@@ -183,6 +178,14 @@ function abrirPanel(idZona, fileId, estado) {
 
     document.getElementById("panel-detalle").classList.add("activo");
 }
+if (!fileId) {
+    document.getElementById("panel-imagen").style.display = "none";
+    document.getElementById("panel-link").style.display = "none";
+} else {
+    document.getElementById("panel-imagen").style.display = "block";
+    document.getElementById("panel-link").style.display = "inline-block";
+}
+
 
 // Botón cerrar panel
 document.addEventListener("DOMContentLoaded", () => {
@@ -213,6 +216,7 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     
     setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
 });
+
 
 
 
