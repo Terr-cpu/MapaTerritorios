@@ -203,7 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener('DOMContentLoaded', () => {
     
     // Inicialización del mapa
-    map = L.map(MAPA_ID).setView([37.3355, -5.9282], 13);
+    map = L.map(MAPA_ID).setView([37.3355, -5.9282], 15);
 
     // Proveedor de Tiles (Calles)
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -217,6 +217,7 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     
     setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
 });
+
 
 
 
