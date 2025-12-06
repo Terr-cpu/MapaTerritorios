@@ -12,6 +12,67 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
 <style>
+  /* PANEL LATERAL */
+#panel-detalle {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 360px;
+    max-width: 90%;
+    height: 100vh;
+    background: #fff;
+    box-shadow: -4px 0 16px rgba(0,0,0,0.25);
+    z-index: 5000;
+    transform: translateX(100%);
+    transition: transform 0.35s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+#panel-detalle.activo {
+    transform: translateX(0);
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #0057b8;
+    color: white;
+    padding: 12px 16px;
+}
+
+#panel-cerrar {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.panel-contenido {
+    padding: 16px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+#panel-imagen {
+    width: 100%;
+    height: auto;
+    max-height: 420px;
+    object-fit: contain;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+/* MOVIL */
+@media (max-width: 600px) {
+    #panel-detalle {
+        width: 100%;
+        max-width: 100%;
+    }
+}
+
     /* Reset mínimo */
     html, body {
         margin: 0;
@@ -84,6 +145,19 @@
 <body>
 
   <div id="mapa"></div>
+<!-- PANEL LATERAL PARA DETALLES -->
+<div id="panel-detalle" class="panel-cerrado">
+    <div class="panel-header">
+        <h2 id="panel-titulo">Zona</h2>
+        <button id="panel-cerrar">✕</button>
+    </div>
+
+    <div class="panel-contenido">
+        <img id="panel-imagen" src="" alt="Vista" />
+        <p id="panel-estado"></p>
+        <a id="panel-link" href="#" target="_blank">Abrir documento completo</a>
+    </div>
+</div>
 
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -100,6 +174,7 @@
 
 </body>
 </html>
+
 
 
 
