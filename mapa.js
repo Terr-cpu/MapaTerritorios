@@ -227,9 +227,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   setTimeout(() => map.invalidateSize(), 300);
 
-L.tileLayer("https://stamen-tiles.a.ssl.fastly.net/toner/{z}/{x}/{y}.png", {
-  maxZoom: 20,
-  attribution: "&copy; Stamen"
+L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+  maxZoom: 19,
+  attribution: "&copy; Carto"
 });
 
  // L.tileLayer(
