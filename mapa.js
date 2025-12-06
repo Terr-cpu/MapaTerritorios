@@ -67,19 +67,26 @@ function styleZona(feature) {
 
 /** Muestra el contenido del popup (Incluye Thumbnail y Link). */
 function manejarClickZona(feature, layer) {
-    const idBruto = feature.properties.Name;
+    const idBruto = feature.properties.Name; 
     const idZona = String(idBruto).trim();
     const datosZona = estadoZonas[idZona];
 
     layer.on({
         mouseover: (e) => e.target.setStyle({ weight: 5, color: '#666', fillOpacity: 0.9 }),
+
         mouseout: (e) => geoJsonLayer.resetStyle(e.target),
+
         click: (e) => {
 
-            // Ajustar zoom a la zona
-            map.fitBounds(e.target.getBounds());
+            // AUTO-ZOOM INTELIGENTE SEGÚN TAMAÑO DEL POLÍGONO
+            const bounds = e.target.getBounds();
+            const area = bounds.getSouthWest().distanceTo(bounds.getNorthEast());
 
-            // Si tenemos datos, abrimos el panel directamente
+            if (area < 80) map.fitBounds(bounds, { maxZoom: 18, animate: true });
+            else if (area < 200) map.fitBounds(bounds, { maxZoom: 17, animate: true });
+            else map.fitBounds(bounds, { maxZoom: 16, animate: true });
+
+            // Abrir panel lateral directamente si hay datos
             if (datosZona && datosZona.pdfId) {
                 abrirPanel(
                     idZona,
@@ -87,18 +94,11 @@ function manejarClickZona(feature, layer) {
                     datosZona.estado
                 );
             } else {
-                // Panel con aviso si no hay datos
-                abrirPanel(
-                    idZona,
-                    null,
-                    datosZona ? datosZona.estado : "Sin datos"
-                );
+                abrirPanel(idZona, null, datosZona ? datosZona.estado : "Sin datos");
             }
         }
     });
 }
-
-
 
 function cargarGeoJson(url) {
     fetch(url)
@@ -111,6 +111,15 @@ function cargarGeoJson(url) {
                 style: styleZona,
                 onEachFeature: manejarClickZona
             }).addTo(map);
+
+            // Encajar todas las zonas con padding
+map.fitBounds(geoJsonLayer.getBounds(), { padding: [20, 20] });
+
+// Ajuste adicional opcional
+setTimeout(() => {
+    map.zoomOut(0.5);
+}, 350);
+
 
 // Ajustar vista automáticamente a la capa cargada (solo zonas reales)
 const bounds = geoJsonLayer.getBounds();
@@ -168,32 +177,33 @@ function actualizarMapa() {
 }
 
 function abrirPanel(idZona, fileId, estado) {
-    const thumbnail = `https://drive.google.com/thumbnail?sz=w1000&id=${fileId}`;
-    const linkCompleto = `https://drive.google.com/file/d/${fileId}/view`;
 
-    if (!fileId) {
-    document.getElementById("panel-imagen").style.display = "none";
-    document.getElementById("panel-link").style.display = "none";
-} else {
-    document.getElementById("panel-imagen").style.display = "block";
-    document.getElementById("panel-link").style.display = "inline-block";
-}
+    // Si hay imagen
+    if (fileId) {
+        const thumbnail = `https://drive.google.com/thumbnail?sz=w1200&id=${fileId}`;
+        const linkCompleto = `https://drive.google.com/file/d/${fileId}/view`;
+
+        document.getElementById("panel-imagen").src = thumbnail;
+        document.getElementById("panel-link").href = linkCompleto;
+        document.getElementById("panel-imagen").style.display = "block";
+        document.getElementById("panel-link").style.display = "inline-block";
+    } else {
+        document.getElementById("panel-imagen").style.display = "none";
+        document.getElementById("panel-link").style.display = "none";
+    }
 
     document.getElementById("panel-titulo").textContent = `Territorio ${idZona}`;
     document.getElementById("panel-estado").textContent = `Estado: ${estado}`;
-    document.getElementById("panel-imagen").src = thumbnail;
-    document.getElementById("panel-link").href = linkCompleto;
 
+    // Mostrar el panel
     document.getElementById("panel-detalle").classList.add("activo");
+
+    // Ajustar tamaño del mapa (muy importante para móvil)
+    setTimeout(() => {
+        map.invalidateSize();
+    }, 300);
 }
 
-
-// Botón cerrar panel
-document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("panel-cerrar").addEventListener("click", () => {
-        document.getElementById("panel-detalle").classList.remove("activo");
-    });
-});
 
 
 // =================================================================
@@ -204,6 +214,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Inicialización del mapa
     map = L.map(MAPA_ID).setView([37.3355, -5.9282], 15);
+
+    setTimeout(() => map.invalidateSize(), 400);
 
     // Proveedor de Tiles (Calles)
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -217,6 +229,27 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     
     setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
 });
+
+// Cerrar panel lateral y restaurar vista general
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("panel-cerrar").addEventListener("click", () => {
+
+        document.getElementById("panel-detalle").classList.remove("activo");
+
+        // Restaurar vista general (todas las zonas)
+        if (geoJsonLayer) {
+            const bounds = geoJsonLayer.getBounds();
+            map.fitBounds(bounds, { padding: [20, 20], animate: true });
+
+            // Zoom de ajuste para estética
+            setTimeout(() => {
+                map.zoomOut(1);
+            }, 350);
+        }
+    });
+});
+
+
 
 
 
