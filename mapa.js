@@ -120,6 +120,11 @@ function cargarGeoJson(url) {
                 onEachFeature: manejarClickZona
             }).addTo(map);
 
+// Ajustar vista automáticamente a la capa cargada (solo zonas reales)
+const bounds = geoJsonLayer.getBounds();
+map.fitBounds(bounds, { padding: [20, 20] });
+
+            
             if (map.getZoom() < 7) {
                  map.fitBounds(geoJsonLayer.getBounds());
             }
@@ -192,6 +197,7 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     
     setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
 });
+
 
 
 
