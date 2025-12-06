@@ -243,11 +243,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Zoom de ajuste para estética
             setTimeout(() => {
-                map.zoomOut(1);
+                map.zoomOut(0.2);
             }, 350);
         }
     });
 });
+
 
 
 
