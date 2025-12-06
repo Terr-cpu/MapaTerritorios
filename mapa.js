@@ -113,18 +113,8 @@ function cargarGeoJson(url) {
             }).addTo(map);
 
             // Encajar todas las zonas con padding
-map.fitBounds(geoJsonLayer.getBounds(), { padding: [20, 20] });
-
-// Ajuste adicional opcional
-setTimeout(() => {
-    map.zoomOut(0.5);
-}, 350);
-
-
-// Ajustar vista automáticamente a la capa cargada (solo zonas reales)
 const bounds = geoJsonLayer.getBounds();
-map.fitBounds(bounds, { padding: [20, 20] });
-
+map.fitBounds(bounds, { padding: [20, 20], animate: true });
             
             if (map.getZoom() < 7) {
                  map.fitBounds(geoJsonLayer.getBounds());
@@ -214,26 +204,25 @@ function abrirPanel(idZona, fileId, estado) {
 // =================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    map.fitBounds(geoJsonLayer.getBounds(), { padding: [20, 20], animate: true });
 
-    // Inicialización del mapa
-    map = L.map(MAPA_ID).setView([37.3355, -5.9282], 15);
+    // Inicialización del mapa
+    map = L.map(MAPA_ID).setView([37.3355, -5.9282], 15);
 
-   setTimeout(() => {
-    map.invalidateSize();
-}, 500);
+    // Ajuste imprescindible para móvil
+    setTimeout(() => {
+        map.invalidateSize();
+    }, 500);
 
-    // Proveedor de Tiles (Calles)
-L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        maxZoom: 19,
-        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
+    // Proveedor de Tiles (Calles)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        attribution: 'Map data © OpenStreetMap contributors'
+    }).addTo(map);
 
+    // Carga inicial de datos
+    actualizarMapa();
 
-    // Carga inicial de datos
-    actualizarMapa();
-    
-    setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
+    setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
 });
 
 // Cerrar panel lateral y restaurar vista general
@@ -263,6 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     });
 });
+
 
 
 
