@@ -231,21 +231,21 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 });
 
 // Cerrar panel lateral y restaurar vista general
+// Cerrar panel lateral y restaurar vista general
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("panel-cerrar").addEventListener("click", () => {
 
         document.getElementById("panel-detalle").classList.remove("activo");
 
-        // Restaurar vista general (todas las zonas)
+        // Restaurar vista general (solo ajustar a los polígonos, sin zoomOut extra)
         if (geoJsonLayer) {
             const bounds = geoJsonLayer.getBounds();
             map.fitBounds(bounds, { padding: [20, 20], animate: true });
 
-            // Zoom de ajuste para estética
-            setTimeout(() => {
-                map.zoomOut(0.2);
-            }, 350);
+            // Importante: reajustar tamaño para móvil
+            setTimeout(() => map.invalidateSize(), 300);
         }
+
     });
 });
 
