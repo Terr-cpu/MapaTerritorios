@@ -181,14 +181,21 @@
 <!-- PANEL LATERAL PARA DETALLES -->
 <div id="panel-detalle" class="panel-cerrado">
     <div class="panel-header">
-        <h2 id="panel-titulo">Zona</h2>
+        <h2 id="panel-titulo">Territorio</h2>
         <button id="panel-cerrar">✕</button>
     </div>
-
+  
     <div class="panel-contenido">
         <img id="panel-imagen" src="" alt="Vista" />
         <p id="panel-estado"></p>
-        <a id="panel-link" href="#" target="_blank">Abrir documento completo</a>
+
+       <!-- Web App incrustada -->
+    <iframe id="panel-webapp"
+        style="width:100%; height:450px; border:0; border-radius:8px; display:none;">
+    </iframe>
+</div>
+
+        
     </div>
 </div>
 
@@ -212,6 +219,7 @@
 
 </body>
 </html>
+
 
 
 
