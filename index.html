@@ -12,75 +12,51 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
   <!-- === ESTILOS RESPONSIVE Y POPUPS (pegados aquí para garantizar que se apliquen) === -->
-  <style>
-    /* Reset mínimo */
-    html, body {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        width: 100%;
-        font-family: Arial, Helvetica, sans-serif;
+  /* POPUP más pequeño y responsive */
+.leaflet-popup {
+    max-width: 260px !important;
+}
+
+.leaflet-popup-content-wrapper {
+    border-radius: 10px !important;
+    padding: 8px !important;
+    max-width: 240px !important;
+}
+
+.leaflet-popup-content {
+    margin: 0 !important;
+    font-size: 14px !important;
+    line-height: 1.35 !important;
+    max-width: 230px !important;
+}
+
+/* Imagen responsive */
+.leaflet-popup-content img {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 180px !important;
+    object-fit: contain !important;
+    border-radius: 6px !important;
+    display: block !important;
+    margin-top: 6px !important;
+}
+
+/* MÓVILES */
+@media (max-width: 600px) {
+    .leaflet-popup {
+        max-width: 200px !important;
     }
 
-    /* Contenedor del mapa */
-    #mapa {
-        width: 100vw !important;
-        height: 100vh !important;
-        max-width: 100% !important;
-        position: relative !important;
-        box-sizing: border-box !important;
-        background: linear-gradient(180deg,#f8fafc,#e9eef6) !important;
-    }
-
-    /* Popup general */
     .leaflet-popup-content-wrapper {
-        border-radius: 12px !important;
-        padding: 10px !important;
-        box-shadow: 0 6px 26px rgba(0,0,0,0.22) !important;
-        background: #fff !important;
+        max-width: 190px !important;
+        padding: 6px !important;
     }
 
-    .leaflet-popup-content {
-        font-size: 15px !important;
-        line-height: 1.36 !important;
-        color: #222 !important;
-        margin: 2px !important;
-        max-width: 240px !important;
-    }
-
-    /* Imagen responsive */
     .leaflet-popup-content img {
-        width: 100% !important;
-        max-width: 100% !important;
-        height: auto !important;
-        max-height: 420px !important;
-        object-fit: contain !important;
-        border-radius: 8px !important;
-        display: block !important;
-        margin: 8px 0 !important;
+        max-height: 150px !important;
     }
+}
 
-    /* --- RESPONSIVE MÓVIL --- */
-    @media (max-width: 600px) {
-
-        #mapa {
-            height: calc(100vh - 4px) !important;
-        }
-
-        .leaflet-popup-content {
-            font-size: 13.5px !important;
-            max-width: 180px !important;
-        }
-
-        .leaflet-popup-content img {
-            max-height: 220px !important;
-        }
-
-        .leaflet-popup-content-wrapper {
-            border-radius: 10px !important;
-        }
-    }
-</style>
 
   <!-- ========================================================================== -->
 </head>
@@ -103,4 +79,5 @@
 
 </body>
 </html>
+
 
