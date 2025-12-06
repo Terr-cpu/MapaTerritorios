@@ -171,19 +171,20 @@ function abrirPanel(idZona, fileId, estado) {
     const thumbnail = `https://drive.google.com/thumbnail?sz=w1000&id=${fileId}`;
     const linkCompleto = `https://drive.google.com/file/d/${fileId}/view`;
 
+    if (!fileId) {
+    document.getElementById("panel-imagen").style.display = "none";
+    document.getElementById("panel-link").style.display = "none";
+} else {
+    document.getElementById("panel-imagen").style.display = "block";
+    document.getElementById("panel-link").style.display = "inline-block";
+}
+
     document.getElementById("panel-titulo").textContent = `Territorio ${idZona}`;
     document.getElementById("panel-estado").textContent = `Estado: ${estado}`;
     document.getElementById("panel-imagen").src = thumbnail;
     document.getElementById("panel-link").href = linkCompleto;
 
     document.getElementById("panel-detalle").classList.add("activo");
-}
-if (!fileId) {
-    document.getElementById("panel-imagen").style.display = "none";
-    document.getElementById("panel-link").style.display = "none";
-} else {
-    document.getElementById("panel-imagen").style.display = "block";
-    document.getElementById("panel-link").style.display = "inline-block";
 }
 
 
@@ -216,6 +217,7 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     
     setInterval(actualizarMapa, TIEMPO_REFRESCO_MS);
 });
+
 
 
 
