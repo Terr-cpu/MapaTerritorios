@@ -195,7 +195,8 @@ function abrirPanel(idZona, fileId, estado) {
 
     // Desplazar el mapa visualmente a la izquierda cuando el panel se abre
     setTimeout(() => {
-        map.panBy([-120, 0], { animate: true });
+        const despl = Math.round(window.innerWidth * 0.22);
+map.panBy([-despl, 0], { animate: true });
     }, 450);
 }
 
@@ -236,8 +237,17 @@ document.addEventListener("DOMContentLoaded", () => {
             const bounds = geoJsonLayer.getBounds();
             map.fitBounds(bounds, { padding: [20, 20], animate: true });
 
-            // Reajustar tamaño móvil
-            setTimeout(() => map.invalidateSize(), 300);
+            // Reajustar tamaño móvil// Ajuste REAL del mapa en móvil
+setTimeout(() => map.invalidateSize(), 300);
+setTimeout(() => map.invalidateSize(), 800);
+setTimeout(() => map.invalidateSize(), 1500);
+
+// Aumentar zoom inicial SOLO en móviles
+if (window.innerWidth < 768) {
+    setTimeout(() => {
+        map.setZoom(16); // puedes subirlo a 17 si quieres más cerca
+    }, 900);
+}
 
             // Acercar un poco la vista para que no quede tan lejos
             setTimeout(() => {
@@ -246,12 +256,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Desplazar mapa hacia la derecha, recuperando la posición original
             setTimeout(() => {
-                map.panBy([120, 0], { animate: true });
+               // Desplazamiento proporcional al tamaño de pantalla
+const desplazamiento = Math.round(window.innerWidth * 0.22);
+
+// Restaurar posición original
+map.panBy([desplazamiento, 0], { animate: true });
+
             }, 650);
         }
 
     });
 });
+
 
 
 
