@@ -185,50 +185,55 @@ function cargarGeoJson(url) {
 }
 
 function aplicarMascara() {
-
     if (!geoJsonLayer) return;
 
-    // Obtener límites de ALL el mundo
-    const worldBounds = [
+    // 1️⃣ Calcular el BOUNDING BOX total de tus zonas
+    const bounds = geoJsonLayer.getBounds();
+
+    const x1 = bounds.getSouthWest().lng;
+    const y1 = bounds.getSouthWest().lat;
+    const x2 = bounds.getNorthEast().lng;
+    const y2 = bounds.getNorthEast().lat;
+
+    // Rectángulo que representa tu área completa de interés
+    const areaVisible = [
+        [y1, x1],
+        [y1, x2],
+        [y2, x2],
+        [y2, x1]
+    ];
+
+    // 2️⃣ Rectángulo gigantesco que cubre todo el mundo
+    const world = [
         [-90, -360],
         [-90, 360],
         [90, 360],
         [90, -360]
     ];
 
-    // Unir todos los polígonos reales en un multi-geom
-    const zonas = [];
-
-    geoJsonLayer.eachLayer((layer) => {
-        if (layer.feature && layer.feature.geometry) {
-            zonas.push(layer.feature.geometry);
-        }
-    });
-
-    // Crear geometría invertida
+    // 3️⃣ Crear máscara invertida (mundo - tu bounding box)
     const mask = {
         type: "Feature",
-        properties: {},
         geometry: {
             type: "Polygon",
             coordinates: [
-                worldBounds,
-                ...zonas.map(z => z.coordinates[0]) // cada zona recorta la máscara
+                world,        // contorno exterior
+                areaVisible   // agujero interior (tu área)
             ]
         }
     };
 
-    // Colocar capa oscurecida encima del mapa
+    // 4️⃣ Añadir capa oscura encima del mapa
     L.geoJSON(mask, {
-        style: () => ({
-            color: "black",
+        style: {
             fillColor: "black",
-            fillOpacity: 0.45,   // oscurecimiento
-            weight: 0
-        }),
+            fillOpacity: 0.45,
+            weight: 0,
+        },
         interactive: false
     }).addTo(map);
 }
+
 
 
 // =================================================================
