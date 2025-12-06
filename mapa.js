@@ -135,27 +135,37 @@ function manejarClickZona(feature, layer) {
 // =================================================================
 
 function abrirPanel(idZona, fileId, estado) {
-  if (fileId) {
-    const thumbnail = `${DRIVE_BASE_URL_THUMB}${fileId}`;
 
-    document.getElementById("panel-imagen").src = thumbnail;
-    document.getElementById("panel-imagen").style.display = "block";
+    // ----- IMAGEN DEL TERRITORIO -----
+    if (fileId) {
+        const thumbnail = `https://drive.google.com/thumbnail?sz=w1600&id=${fileId}`;
+        document.getElementById("panel-imagen").src = thumbnail;
+        document.getElementById("panel-imagen").style.display = "block";
+    } else {
+        document.getElementById("panel-imagen").style.display = "none";
+    }
 
-    // CLICK → ABRIR VISOR GRANDE
-    document.getElementById("panel-imagen").onclick = () => {
-      document.getElementById("visor-img").src = thumbnail;
-      document.getElementById("visor-imagen").classList.add("activo");
-    };
-  } else {
-    document.getElementById("panel-imagen").style.display = "none";
-  }
+    // ----- TEXTO -----
+    document.getElementById("panel-titulo").textContent = `Territorio ${idZona}`;
+    document.getElementById("panel-estado").textContent = `Estado: ${estado}`;
 
-  document.getElementById("panel-titulo").textContent = `Territorio ${idZona}`;
-  document.getElementById("panel-estado").textContent = `Estado: ${estado}`;
+    // ----- WEB APP -----
+    // Puedes añadir parámetros GET como id, estado, etc.
+    const webAppURL = `https://script.google.com/macros/s/AKfycbxoDr8Cu3iFlAPX749WFJunR7cVpaoDO0RskbuoIykmY6rz0wJeCq6D_Nvr8MTWISmRgw/exec?id=${idZona}`;
 
-  document.getElementById("panel-detalle").classList.add("activo");
+    const webFrame = document.getElementById("panel-webapp");
+    webFrame.src = webAppURL;
+    webFrame.style.display = "block";
 
-  setTimeout(() => map.invalidateSize(), 300);
+    // ----- MOSTRAR PANEL -----
+    document.getElementById("panel-detalle").classList.add("activo");
+
+    // Ajuste de mapa al abrir
+    setTimeout(() => map.invalidateSize(), 350);
+    setTimeout(() => {
+        const offset = Math.round(window.innerWidth * 0.22);
+        map.panBy([-offset, 0], { animate: true });
+    }, 450);
 }
 
 // =================================================================
@@ -244,9 +254,28 @@ document.addEventListener("DOMContentLoaded", () => {
 // =================================================================
 
 document.getElementById("panel-cerrar").addEventListener("click", () => {
-  document.getElementById("panel-detalle").classList.remove("activo");
 
-  map.setView(VISTA_GENERAL.centro, VISTA_GENERAL.zoom, { animate: true });
+    document.getElementById("panel-detalle").classList.remove("activo");
 
-  setTimeout(() => map.invalidateSize(), 300);
+    // Ocultar Web App
+    const webFrame = document.getElementById("panel-webapp");
+    webFrame.style.display = "none";
+    webFrame.src = "";
+
+    // Ocultar imagen
+    document.getElementById("panel-imagen").style.display = "none";
+
+    // Restaurar vista general
+    if (geoJsonLayer) {
+        const bounds = geoJsonLayer.getBounds();
+        map.fitBounds(bounds, { padding: [20, 20], animate: true });
+
+        setTimeout(() => map.invalidateSize(), 300);
+
+        // Corrección de desplazamiento proporcional
+        const offset = Math.round(window.innerWidth * 0.22);
+        setTimeout(() => {
+            map.panBy([offset, 0], { animate: true });
+        }, 650);
+    }
 });
