@@ -4,7 +4,7 @@
 
 // URL Apps Script
 const GOOGLE_SHEET_URL =
-  "https://script.google.com/macros/s/AKfycbxym4UsG7Afk3sRLVmtHFAFoGbAMTomgpvbkxyUdaKA5oHgHsi2LmaVOoewOXw_6v0/exec";
+  "https://script.google.com/macros/s/AKfycbzi61cNO2ktIo8VyTYzomjyu6Dhcfmsmoc9VvV74uBRzOE7khNVUmcMPS2nnvNzHKxWzA/exec";
 
 const GEOJSON_URL = "zonas.geojson";
 
