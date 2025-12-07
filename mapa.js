@@ -37,10 +37,10 @@ function obtenerColorEstado(estado) {
   switch (estado.toLowerCase()) {
     case "activo":
     case "completado":
-      return "#28a745";
+      return "#dc3545";
     case "expirado":
     case "pendiente":
-      return "#dc3545";
+      return "#28a745";
     default:
       return "#808080";
   }
